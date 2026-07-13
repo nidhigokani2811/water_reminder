@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="A premium retro-themed water reminder companion featuring customizable pixel art characters, interactive widgets, motivational speech bubbles, and synthesized audio alerts.">
+    <title>AquaBuddy | Retro Hydration Companion</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=VT323&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Main Dashboard Header -->
+        <header class="app-header">
+            <div class="logo">
+                <span class="logo-icon">💧</span>
+                <h1>AquaBuddy</h1>
+                <span class="badge">Retro Edition</span>
+            </div>
+            
+            <div class="header-actions">
+                <button id="notification-toggle" class="btn btn-secondary">
+                    <span class="icon">🔔</span>
+                    <span id="notif-btn-text">Enable Notifications</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Navigation Tabs -->
+        <nav class="app-nav">
+            <button class="nav-tab active" data-tab="tab-dashboard">🎮 Companion & Timer</button>
+            <button class="nav-tab" data-tab="tab-reports">📊 Analytics & Insights</button>
+            <button class="nav-tab" data-tab="tab-settings">⚙️ Settings</button>
+        </nav>
+
+        <!-- Main Dashboard Content Grid -->
+        <main class="dashboard-content">
+            
+            <!-- TAB 1: Companion & Timer -->
+            <div id="tab-dashboard" class="tab-panel active">
+                <div class="dashboard-grid">
+                    <!-- Hydration Summary Widget -->
+                    <section class="card stats-card">
+                        <div class="card-header">
+                            <h2>Daily Progress</h2>
+                            <span class="streak-badge">🔥 <span id="streak-count">0</span> Day Streak</span>
+                        </div>
+                        
+                        <div class="stats-display">
+                            <div class="stats-metric">
+                                <span class="value" id="total-intake">0</span>
+                                <span class="unit">ml / <span id="target-display">2000</span>ml</span>
+                            </div>
+                            
+                            <div class="progress-bar-container">
+                                <div class="progress-bar-fill" id="progress-fill" style="width: 0%"></div>
+                            </div>
+
+                            <!-- Yesterday Nudge Box -->
+                            <div class="nudge-box" id="daily-nudge-box">
+                                <span class="nudge-icon">💡</span>
+                                <span class="nudge-text" id="daily-nudge-text">Drink water to kickstart your day!</span>
+                            </div>
+                            
+                            <div class="glasses-counter">
+                                <div class="counter-label">Glasses Drank Today:</div>
+                                <div class="glasses-grid" id="glasses-grid">
+                                    <!-- Glasses icons will be dynamically rendered here -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="quick-add">
+                            <button class="btn btn-primary" id="add-glass-btn">
+                                <span>➕ Add Glass (250ml)</span>
+                            </button>
+                            <button class="btn btn-outline" id="reset-daily-btn">Reset Day</button>
+                        </div>
+                    </section>
+
+                    <!-- Active Timer Widget -->
+                    <section class="card timer-card">
+                        <div class="card-header">
+                            <h2>Next Hydration Alert</h2>
+                        </div>
+                        
+                        <div class="timer-display-container">
+                            <svg class="progress-ring" width="220" height="220">
+                                <circle class="progress-ring-circle-bg" stroke="rgba(255, 255, 255, 0.05)" stroke-width="8" fill="transparent" r="95" cx="110" cy="110"/>
+                                <circle class="progress-ring-circle-fill" id="timer-ring-fill" stroke="var(--primary-color)" stroke-width="8" fill="transparent" r="95" cx="110" cy="110"/>
+                            </svg>
+                            
+                            <div class="timer-value-container">
+                                <div class="timer-countdown" id="timer-display">20:00</div>
+                                <div class="timer-status" id="timer-status">Counting Down</div>
+                            </div>
+                        </div>
+
+                        <div class="timer-controls">
+                            <button class="btn btn-primary" id="timer-play-pause-btn">Pause Timer</button>
+                            <button class="btn btn-outline" id="timer-reset-btn">Restart Interval</button>
+                        </div>
+                    </section>
+                </div>
+
+                <!-- History Logs in Tab 1 -->
+                <section class="card history-card" style="margin-top: 1.5rem;">
+                    <div class="card-header">
+                        <h2>Hydration Log (Today)</h2>
+                    </div>
+                    <div class="history-list-wrapper">
+                        <ul class="history-list" id="history-list">
+                            <li class="history-empty">No water logs for today yet. Keep drinking!</li>
+                        </ul>
+                    </div>
+                </section>
+            </div>
+
+            <!-- TAB 2: Analytics & Reports -->
+            <div id="tab-reports" class="tab-panel">
+                <!-- Comparison Nudge Card -->
+                <section class="card comparison-card">
+                    <div class="card-header">
+                        <h2>Performance vs. Yesterday</h2>
+                    </div>
+                    <div class="comparison-display">
+                        <div class="comparison-stat">
+                            <span class="label">Today's Intake</span>
+                            <span class="value-highlight" id="today-val-report">0 ml</span>
+                        </div>
+                        <div class="comparison-divider">⚡</div>
+                        <div class="comparison-stat">
+                            <span class="label">Yesterday's Intake</span>
+                            <span class="value-muted" id="yesterday-val-report">0 ml</span>
+                        </div>
+                    </div>
+                    <div class="comparison-summary" id="comparison-analysis">
+                        You haven't recorded water yesterday. Let's make today a starting baseline!
+                    </div>
+                </section>
+
+                <div class="reports-grid" style="margin-top: 1.5rem;">
+                    <!-- Weekly Report Chart -->
+                    <section class="card chart-card">
+                        <div class="card-header">
+                            <h2>Weekly Hydration Trend</h2>
+                        </div>
+                        <div class="chart-container">
+                            <div class="bar-chart" id="weekly-bar-chart">
+                                <!-- Dynamic Weekly Bars will render here -->
+                            </div>
+                        </div>
+                        <div class="chart-labels" id="weekly-labels">
+                            <!-- Weekday labels -->
+                        </div>
+                    </section>
+
+                    <!-- Monthly Summary Card -->
+                    <section class="card monthly-card">
+                        <div class="card-header">
+                            <h2>Monthly Hydration Summary</h2>
+                        </div>
+                        <div class="monthly-metrics">
+                            <div class="metric-box">
+                                <span class="label">Monthly Average</span>
+                                <span class="value" id="monthly-average">0 ml</span>
+                            </div>
+                            <div class="metric-box">
+                                <span class="label">Goal Completion Rate</span>
+                                <span class="value" id="monthly-completion">0%</span>
+                            </div>
+                            <div class="metric-box">
+                                <span class="label">Total Drink Events</span>
+                                <span class="value" id="monthly-events">0</span>
+                            </div>
+                        </div>
+                        
+                        <div class="monthly-list-header">Last 30 Days Log:</div>
+                        <div class="monthly-log-list" id="monthly-log-list">
+                            <!-- Scrollable 30 day history -->
+                            <div class="history-empty">No logged history found yet.</div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+
+            <!-- TAB 3: Settings -->
+            <div id="tab-settings" class="tab-panel">
+                <section class="card settings-card">
+                    <div class="card-header">
+                        <h2>Settings & Companion</h2>
+                    </div>
+                    
+                    <form class="settings-form" id="settings-form" onsubmit="return false;">
+                        <div class="form-group">
+                            <label for="companion-select">Choose Your Companion:</label>
+                            <select id="companion-select" class="form-select">
+                                <option value="1">Sophie (Chibi Girl)</option>
+                                <option value="2">Ginger (Orange Cat)</option>
+                                <option value="3">Leo (Blue Hoodie Boy)</option>
+                                <option value="4">Robby (Robby the Robot)</option>
+                                <option value="5">Finny (Wizard Frog)</option>
+                                <option value="random">Randomize Each Alert</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="interval-input">Reminder Interval (minutes):</label>
+                            <div class="input-with-unit">
+                                <input type="number" id="interval-input" min="1" max="180" value="20" class="form-input">
+                                <span class="unit">min</span>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="goal-input">Daily Hydration Goal (ml):</label>
+                            <div class="input-with-unit">
+                                <input type="number" id="goal-input" min="500" max="6000" step="100" value="2000" class="form-input">
+                                <span class="unit">ml</span>
+                            </div>
+                        </div>
+
+                        <div class="form-group checkbox-group" style="flex-direction: row; align-items: center; gap: 10px; margin: 5px 0;">
+                            <input type="checkbox" id="startup-checkbox" class="form-checkbox">
+                            <label for="startup-checkbox" style="color: var(--text-main); font-weight: 500; cursor: pointer;">Launch automatically on system startup</label>
+                        </div>
+
+                        <button class="btn btn-secondary btn-full" id="save-settings-btn">Apply Settings</button>
+                    </form>
+                </section>
+            </div>
+
+        </main>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

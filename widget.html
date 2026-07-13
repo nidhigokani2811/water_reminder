@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AquaBuddy Reminder Widget</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* Specific window overrides for transparent background rendering */
+        body {
+            background: transparent !important;
+            background-image: none !important;
+            min-height: auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 0;
+            margin: 0;
+            overflow: hidden;
+            width: 100vw;
+            height: 100vh;
+        }
+        
+        .retro-widget {
+            position: relative;
+            bottom: auto;
+            right: auto;
+            filter: drop-shadow(4px 4px 0px rgba(0, 0, 0, 0.45));
+            transform: none !important;
+            opacity: 1 !important;
+            pointer-events: auto;
+            margin: 0;
+            animation: slideUpWidget 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        @keyframes slideUpWidget {
+            0% {
+                transform: translateY(150px) scale(0.9);
+                opacity: 0;
+            }
+            100% {
+                transform: translateY(0) scale(1);
+                opacity: 1;
+            }
+        }
+
+        .companion-sprite.walking {
+            animation: characterWalk 0.35s infinite ease-in-out !important;
+        }
+        
+        @keyframes characterWalk {
+            0%, 100% {
+                transform: translateY(0) translateX(0) rotate(0deg);
+            }
+            25% {
+                transform: translateY(-6px) translateX(-3px) rotate(-4deg);
+            }
+            50% {
+                transform: translateY(0) translateX(0) rotate(0deg);
+            }
+            75% {
+                transform: translateY(-6px) translateX(3px) rotate(4deg);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- FLOATING RETRO INTERACTIVE WIDGET -->
+    <div id="retro-widget" class="retro-widget">
+        <!-- Speech Bubble -->
+        <div class="retro-speech-bubble">
+            <div class="retro-speech-text" id="widget-message">TIME TO DRINK WATER TO KEEP YOUR SKIN GLOWING!</div>
+        </div>
+        
+        <!-- Companion Sprite and Base -->
+        <div class="companion-character-container">
+            <img id="companion-sprite" class="companion-sprite" src="character3.png" alt="Companion Sprite">
+            <div class="companion-base"></div>
+        </div>
+
+        <!-- Action Panel -->
+        <div class="retro-actions">
+            <button id="widget-drank-btn" class="retro-btn retro-btn-drank">YES, I DRANK</button>
+            <button id="widget-snooze-btn" class="retro-btn retro-btn-snooze">SNOOZE</button>
+        </div>
+    </div>
+    
+    <script src="widget.js"></script>
+</body>
+</html>
