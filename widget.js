@@ -1,18 +1,18 @@
 // AquaBuddy Retro Widget Renderer Logic
 
 const REMINDER_MESSAGES = [
+    // --- English Quotes ---
     "Time to drink water to keep your skin glowing! ✨",
     "Hydrate or diedrate! Drink up! 💧",
     "Your kidneys are begging you for a splash of water! 👑",
     "Water is life! Take a sip, you beautiful human! 🌸",
-    "Psst... are you turning into a dry raisin? Drink water!",
+    "Psst... are you turning into a dry raisin? Drink water! 🍇",
     "A wild water reminder appeared! Choose: DRANK or SNOOZE. 👾",
     "Fuel your brain, refresh your cells! 🧠💦",
     "Drink water now! I am watching you... 👀🥛",
     "Level up your energy! Take a sip of the elixir of life. 🧪",
     "Gulp gulp gulp! It is hydration hour! ⏰",
     "Your organs are chanting: WATER! WATER! WATER! 📣",
-    "Drink up! Future you is thanking you for the hydration. 🚀",
     "Did you know? Water cures grumpiness. Take a sip! 😠➡️😊",
     "Time to lubricate those joints and feed your brain! 🦾",
     "H2O time! Keep that energy high and body happy! ⚡",
@@ -20,7 +20,7 @@ const REMINDER_MESSAGES = [
     "One small glass for you, one giant leap for your health! 🧑‍🚀",
     "Alert: Hydration levels dropping. Refill immediately! 🚨",
     "Water check! Drop what you're doing and take a gulp. 🛑🥤",
-    "Keep the flow going! Drink 250ml of liquid energy. ⛲",
+    "Keep the flow going! Drink some liquid energy. ⛲",
     "Stay fresh, stay cool! Pour a glass of water. 🧊",
     "Every sip is a step toward a healthier, more vibrant you! 🌟",
     "Your future self will thank you for the hydration. Sip now! 🚀",
@@ -36,7 +36,19 @@ const REMINDER_MESSAGES = [
     "Be proud of your progress. Keep the hydration streak alive! 🔥",
     "Hydration is key to high vibes and bright minds. 🌟",
     "Refresh. Refuel. Reignite. Sip some water! 🧊",
-    "Drink water: because you deserve to feel amazing every day! 🌸"
+    "Drink water: because you deserve to feel amazing every day! 🌸",
+
+    // --- Gujarati (in English Characters) Funny & Friendly Lines ---
+    "Ey dost, tu suki draksh jevo thai gayo chhe! Chal pani pi! 🍇",
+    "Chal bhai, have bahu kaam karyu, ek glass pani gatgatavi ja! 🥛",
+    "Screen jovanu muko ane pehla ek ghutdo pani pio! Hu badhu jou chhu ho! 👀",
+    "Tari kidneys bumo pade chhe: bhai, thodu pani to mokal! 📣",
+    "Chal dost, pani pi le nahin to battery low thai jashe! ⚡",
+    "Taru sharir kai ran nathi ke pani vagar chalshe, chal pi le! 🌵",
+    "Chal, modu na kar! Pani pi ane pacho kame lagi ja! 🚀",
+    "Ek nano viram le ane gatgatavi ja! Moj ma re! 😉💧",
+    "Hydrate rahesho to life set raheshe, chal pani pi le! 🥛✨",
+    "Ey hero! Pani pivano samay thai gayo chhe ho! 😎🥛"
 ];
 
 let audioCtx = null;
@@ -168,33 +180,45 @@ document.addEventListener("DOMContentLoaded", () => {
     // Listen for alert trigger from main process
     if (window.api && window.api.onAlertTrigger) {
         window.api.onAlertTrigger((state) => {
-            // Check yesterday's comparison and generate customized messages
-            let message = "";
             const compName = state.companionName || "AquaBuddy";
             const currentHour = new Date().getHours();
             const timeGreeting = currentHour < 12 ? "Good morning!" : currentHour >= 18 ? "Good evening!" : "Hello!";
             
-            if (state.yesterdayIntake && state.yesterdayIntake > 0) {
-                if (state.currentIntake < state.yesterdayIntake) {
-                    message = `${compName} says: ${timeGreeting} Yesterday you drank ${state.yesterdayIntake}ml. You are at ${state.currentIntake}ml today. Keep pushing to beat your score! 🚀`;
-                } else {
-                    message = `${compName} says: You beat yesterday's intake of ${state.yesterdayIntake}ml! Drank ${state.currentIntake}ml today. Legendary hydration! 🏆`;
-                }
-            } else {
-                const randomIndex = Math.floor(Math.random() * REMINDER_MESSAGES.length);
-                message = `${compName} says: ${timeGreeting} ${REMINDER_MESSAGES[randomIndex]}`;
-            }
+            // 1. Pick a random message from the pool (English or Gujarati!)
+            const randomIndex = Math.floor(Math.random() * REMINDER_MESSAGES.length);
+            let rawMsg = REMINDER_MESSAGES[randomIndex];
             
             // Replace generic 250ml with customized glass size if it exists in message
             if (state.glassSize) {
-                message = message.replace("250ml", `${state.glassSize}ml`);
+                rawMsg = rawMsg.replace("250ml", `${state.glassSize}ml`);
             }
             
             if (state.streak >= 3) {
-                message += " 🔥 You're on a hydration streak! 🔥";
+                rawMsg += " 🔥 Hydration streak!";
             }
             
-            msgElement.textContent = message;
+            // 2. Set Companion Header
+            const headerElement = document.getElementById("widget-companion-header");
+            if (headerElement) {
+                headerElement.textContent = `🌸 ${compName} says:`;
+            }
+            
+            // 3. Set main quote/message body
+            msgElement.textContent = rawMsg;
+            
+            // 4. Update Stats Footer
+            const statsElement = document.getElementById("widget-stats-footer");
+            if (statsElement) {
+                const todayVal = state.currentIntake || 0;
+                const goalVal = state.dailyGoal || 2000;
+                let statsText = `💧 ${todayVal}/${goalVal}ml`;
+                
+                if (state.yesterdayIntake && state.yesterdayIntake > 0) {
+                    statsText += ` | 📈 Yesterday: ${state.yesterdayIntake}ml`;
+                }
+                
+                statsElement.textContent = statsText;
+            }
             
             // Start off-screen
             const widget = document.getElementById("retro-widget");

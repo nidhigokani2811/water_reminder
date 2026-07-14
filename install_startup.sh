@@ -6,7 +6,7 @@
 PLIST_LABEL="com.aquabuddy"
 PLIST_DIR="$HOME/Library/LaunchAgents"
 PLIST_FILE="$PLIST_DIR/$PLIST_LABEL.plist"
-APP_PATH="/Users/tsc/Desktop/water_reminder"
+APP_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 echo "⚙️  Configuring macOS startup & auto-restart (KeepAlive) for AquaBuddy..."
 
