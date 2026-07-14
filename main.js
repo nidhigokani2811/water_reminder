@@ -15,7 +15,9 @@ let state = {
     dailyGoal: 2000,
     currentIntake: 0,
     intervalMinutes: 20,
+    glassSize: 250,
     activeCompanion: "3", // default Leo
+    companionName: "AquaBuddy",
     streak: 0,
     lastActiveDate: "",
     history: [],          // Projected dynamically for today
@@ -181,10 +183,16 @@ function updateTrayMenu() {
                 }
             } 
         },
-        { 
-            label: 'Drink Glass (250ml)', 
+        {
+            label: 'Test Reminder (Debug)',
             click: () => {
-                addWater(250);
+                triggerHydrationAlert();
+            }
+        },
+        { 
+            label: `Drink Glass (${state.glassSize || 250}ml)`, 
+            click: () => {
+                addWater(state.glassSize || 250);
             } 
         },
         { 
@@ -262,17 +270,16 @@ function createWidgetWindow() {
     }
 
     const { width, height } = screen.getPrimaryDisplay().workArea;
-    const widgetWidth = 320;
+    const widgetWidth = 344; // Extended to touch the right edge for smooth CSS sliding
     const widgetHeight = 350;
     
-    const targetX = width - widgetWidth - 24;
-    const startX = width; // Start off-screen to the right
+    const targetX = width - widgetWidth;
     const y = height - widgetHeight - 24;
 
     widgetWindow = new BrowserWindow({
         width: widgetWidth,
         height: widgetHeight,
-        x: startX,
+        x: targetX,
         y: y,
         frame: false,
         transparent: true,
@@ -288,61 +295,21 @@ function createWidgetWindow() {
         }
     });
 
+    // Ensure it shows on all spaces and on top of fullscreen apps
+    widgetWindow.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
+    widgetWindow.setAlwaysOnTop(true, 'screen-saver', 1);
+
     widgetWindow.loadFile('widget.html');
 
     widgetWindow.once('ready-to-show', () => {
         widgetWindow.show();
         // Send state to widget so it knows active companion & details
         widgetWindow.webContents.send('alert-trigger', state);
-        startWalkIn(startX, targetX, y);
     });
 
     widgetWindow.on('closed', () => {
-        stopWalking();
         widgetWindow = null;
     });
-}
-
-// Walking / Pacing animation interval for desktop overlay widget
-let walkInterval = null;
-function startWalkIn(startX, targetX, y) {
-    if (walkInterval) clearInterval(walkInterval);
-    
-    let currentX = startX;
-    
-    // Set initial direction to face left (walking onto screen from right)
-    setTimeout(() => {
-        if (widgetWindow && !widgetWindow.isDestroyed()) {
-            widgetWindow.webContents.send('direction-change', 'left');
-        }
-    }, 100);
-
-    walkInterval = setInterval(() => {
-        if (!widgetWindow || widgetWindow.isDestroyed()) {
-            stopWalking();
-            return;
-        }
-        
-        currentX -= 4.5; // Walk speed moving leftwards
-        
-        if (currentX <= targetX) {
-            currentX = targetX;
-            clearInterval(walkInterval);
-            walkInterval = null;
-            
-            // Stop character walking, display speech bubble and actions
-            widgetWindow.webContents.send('walk-completed');
-        }
-        
-        widgetWindow.setPosition(Math.round(currentX), Math.round(y));
-    }, 20); // 50fps smooth walk-in
-}
-
-function stopWalking() {
-    if (walkInterval) {
-        clearInterval(walkInterval);
-        walkInterval = null;
-    }
 }
 
 // Background Timer Management
@@ -430,6 +397,8 @@ ipcMain.handle('get-state', () => {
 ipcMain.on('apply-settings', (event, newSettings) => {
     state.dailyGoal = newSettings.dailyGoal;
     state.activeCompanion = newSettings.activeCompanion;
+    state.companionName = newSettings.companionName || "AquaBuddy";
+    state.glassSize = newSettings.glassSize || 250;
     const intervalChanged = state.intervalMinutes !== newSettings.intervalMinutes;
     state.intervalMinutes = newSettings.intervalMinutes;
     
@@ -497,7 +466,7 @@ ipcMain.on('reset-daily', () => {
 });
 
 ipcMain.on('widget-drank', () => {
-    addWater(250);
+    addWater(state.glassSize || 250);
     state.secondsRemaining = state.intervalMinutes * 60;
     if (widgetWindow && !widgetWindow.isDestroyed()) {
         widgetWindow.close();

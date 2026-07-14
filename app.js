@@ -4,7 +4,9 @@ let state = {
     dailyGoal: 2000,
     currentIntake: 0,
     intervalMinutes: 20,
+    glassSize: 250,
     activeCompanion: "3",
+    companionName: "AquaBuddy",
     streak: 0,
     history: [],
     allTimeLogs: [],
@@ -30,8 +32,10 @@ const historyList = document.getElementById("history-list");
 
 // DOM Elements - Settings
 const companionSelect = document.getElementById("companion-select");
+const companionNameInput = document.getElementById("companion-name");
 const intervalInput = document.getElementById("interval-input");
 const goalInput = document.getElementById("goal-input");
+const glassSizeInput = document.getElementById("glass-size-input");
 const startupCheckbox = document.getElementById("startup-checkbox");
 const saveSettingsBtn = document.getElementById("save-settings-btn");
 
@@ -108,7 +112,7 @@ function updateProgressUI() {
     streakDisplay.textContent = state.streak;
     
     // Draw Glass Icons
-    const numGlasses = Math.floor(state.currentIntake / 250);
+    const numGlasses = Math.floor(state.currentIntake / (state.glassSize || 250));
     glassesGrid.innerHTML = "";
     
     if (numGlasses === 0) {
@@ -132,8 +136,14 @@ function updateProgressUI() {
     // Sync Settings Form elements
     intervalInput.value = state.intervalMinutes;
     goalInput.value = state.dailyGoal;
+    if (glassSizeInput) glassSizeInput.value = state.glassSize || 250;
     companionSelect.value = state.activeCompanion;
+    if (companionNameInput) companionNameInput.value = state.companionName || "AquaBuddy";
     startupCheckbox.checked = !!state.openAtLogin;
+    
+    // Update Add Glass button text
+    const addGlassText = document.querySelector("#add-glass-btn span");
+    if (addGlassText) addGlassText.textContent = `➕ Add Glass (${state.glassSize || 250}ml)`;
     
     // Render History Logs
     renderHistory();
@@ -417,7 +427,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     // Event listeners
     addGlassBtn.addEventListener("click", () => {
         if (window.api && window.api.addManualWater) {
-            window.api.addManualWater(250);
+            window.api.addManualWater(state.glassSize || 250);
         }
     });
     
@@ -444,7 +454,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     saveSettingsBtn.addEventListener("click", () => {
         const goal = parseInt(goalInput.value);
         const interval = parseInt(intervalInput.value);
+        const glassSize = parseInt(glassSizeInput.value);
         const companion = companionSelect.value;
+        const compName = companionNameInput ? companionNameInput.value.trim() : "AquaBuddy";
         const autoStart = startupCheckbox.checked;
         
         if (isNaN(interval) || interval < 1 || interval > 180) {
@@ -455,12 +467,18 @@ document.addEventListener("DOMContentLoaded", async () => {
             alert("Please enter a valid daily goal between 500 and 6000 ml.");
             return;
         }
+        if (isNaN(glassSize) || glassSize < 50 || glassSize > 1000) {
+            alert("Please enter a valid glass size between 50 and 1000 ml.");
+            return;
+        }
         
         if (window.api && window.api.applySettings) {
             window.api.applySettings({
                 dailyGoal: goal,
                 intervalMinutes: interval,
+                glassSize: glassSize,
                 activeCompanion: companion,
+                companionName: compName || "AquaBuddy",
                 openAtLogin: autoStart
             });
             alert("Settings applied!");

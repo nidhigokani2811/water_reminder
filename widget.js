@@ -5,7 +5,7 @@ const REMINDER_MESSAGES = [
     "Hydrate or diedrate! Drink up! 💧",
     "Your kidneys are begging you for a splash of water! 👑",
     "Water is life! Take a sip, you beautiful human! 🌸",
-    "Psst... are you turning into a dry raisin? Drink water! 🍇",
+    "Psst... are you turning into a dry raisin? Drink water!",
     "A wild water reminder appeared! Choose: DRANK or SNOOZE. 👾",
     "Fuel your brain, refresh your cells! 🧠💦",
     "Drink water now! I am watching you... 👀🥛",
@@ -79,11 +79,80 @@ function playRetroChime() {
     });
 }
 
+function playBloopSound() {
+    initAudio();
+    if (!audioCtx) return;
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    const now = audioCtx.currentTime;
+    
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(400, now);
+    osc.frequency.exponentialRampToValueAtTime(800, now + 0.15);
+    
+    gain.gain.setValueAtTime(0.3, now);
+    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+    
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    
+    osc.start(now);
+    osc.stop(now + 0.2);
+}
+
+function playYawnSound() {
+    initAudio();
+    if (!audioCtx) return;
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    const now = audioCtx.currentTime;
+    
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(300, now);
+    osc.frequency.exponentialRampToValueAtTime(150, now + 0.6);
+    
+    gain.gain.setValueAtTime(0.2, now);
+    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.6);
+    
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    
+    osc.start(now);
+    osc.stop(now + 0.6);
+}
+
+function spawnParticles() {
+    const container = document.getElementById("particle-container");
+    if (!container) return;
+    
+    const emojis = ['💧', '✨', '💙', '🌊', '💧'];
+    
+    for (let i = 0; i < 8; i++) {
+        const p = document.createElement('div');
+        p.className = 'particle';
+        p.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+        
+        const tx = (Math.random() - 0.5) * 100 + 'px';
+        const tr = (Math.random() - 0.5) * 60 + 'deg';
+        p.style.setProperty('--tx', tx);
+        p.style.setProperty('--tr', tr);
+        
+        container.appendChild(p);
+    }
+}
+
 // Load companion sprite (assets are pre-processed to have transparent backgrounds)
 function loadCompanionSprite(charId) {
     const companionSprite = document.getElementById("companion-sprite");
     if (!companionSprite) return;
-    companionSprite.src = `character${charId}.png`;
+    
+    companionSprite.className = "companion-sprite spritesheet"; // Reset and apply spritesheet class
+    companionSprite.style.backgroundImage = `url('character${charId}.png')`;
+    companionSprite.style.backgroundSize = "400% auto";
 }
 
 // Set up UI actions and IPC triggers
@@ -101,28 +170,45 @@ document.addEventListener("DOMContentLoaded", () => {
         window.api.onAlertTrigger((state) => {
             // Check yesterday's comparison and generate customized messages
             let message = "";
+            const compName = state.companionName || "AquaBuddy";
+            const currentHour = new Date().getHours();
+            const timeGreeting = currentHour < 12 ? "Good morning!" : currentHour >= 18 ? "Good evening!" : "Hello!";
+            
             if (state.yesterdayIntake && state.yesterdayIntake > 0) {
                 if (state.currentIntake < state.yesterdayIntake) {
-                    message = `Yesterday you drank ${state.yesterdayIntake}ml. You are at ${state.currentIntake}ml today. Keep pushing to beat your score! 🚀`;
+                    message = `${compName} says: ${timeGreeting} Yesterday you drank ${state.yesterdayIntake}ml. You are at ${state.currentIntake}ml today. Keep pushing to beat your score! 🚀`;
                 } else {
-                    message = `You beat yesterday's intake of ${state.yesterdayIntake}ml! Drank ${state.currentIntake}ml today. Legendary hydration! 🏆`;
+                    message = `${compName} says: You beat yesterday's intake of ${state.yesterdayIntake}ml! Drank ${state.currentIntake}ml today. Legendary hydration! 🏆`;
                 }
             } else {
                 const randomIndex = Math.floor(Math.random() * REMINDER_MESSAGES.length);
-                message = REMINDER_MESSAGES[randomIndex];
+                message = `${compName} says: ${timeGreeting} ${REMINDER_MESSAGES[randomIndex]}`;
             }
+            
+            // Replace generic 250ml with customized glass size if it exists in message
+            if (state.glassSize) {
+                message = message.replace("250ml", `${state.glassSize}ml`);
+            }
+            
+            if (state.streak >= 3) {
+                message += " 🔥 You're on a hydration streak! 🔥";
+            }
+            
             msgElement.textContent = message;
             
+            // Start off-screen
+            const widget = document.getElementById("retro-widget");
+            if (widget) {
+                widget.classList.remove("arrived");
+            }
+
             // Hide speech bubble and actions container during walk-in
             if (speechBubble) speechBubble.classList.remove("show");
             if (actionsContainer) actionsContainer.classList.remove("show");
             
-            // Render companion sprite
-            let charId = state.activeCompanion;
-            if (charId === "random") {
-                const ids = ["1", "2", "3", "4", "5"];
-                charId = ids[Math.floor(Math.random() * ids.length)];
-            }
+            // Render companion sprite (always random to show a different one every time)
+            const ids = ["1", "2", "3", "4", "5", "6"];
+            let charId = ids[Math.floor(Math.random() * ids.length)];
             loadCompanionSprite(charId);
             
             // Trigger walking animation state
@@ -130,49 +216,76 @@ document.addEventListener("DOMContentLoaded", () => {
             if (companionSprite) {
                 companionSprite.classList.add("walking");
             }
-        });
-    }
-
-    // Listen for walking direction changes (apply flip to container to avoid animation overrides)
-    if (window.api && window.api.onDirectionChange) {
-        window.api.onDirectionChange((direction) => {
+            
+            // Ensure character faces left when walking in
             const container = document.querySelector(".companion-character-container");
             if (container) {
-                if (direction === 'right') {
-                    container.style.transform = 'scaleX(-1)';
-                } else {
-                    container.style.transform = 'scaleX(1)';
-                }
+                container.style.transform = 'scaleX(-1)';
             }
-        });
-    }
 
-    // Listen for walk arrival completion (stops character, shows bubble, plays chime)
-    if (window.api && window.api.onWalkCompleted) {
-        window.api.onWalkCompleted(() => {
-            const sprite = document.getElementById("companion-sprite");
-            if (sprite) {
-                sprite.classList.remove("walking"); // Stand still
-            }
-            if (speechBubble) speechBubble.classList.add("show");
-            if (actionsContainer) actionsContainer.classList.add("show");
-            
-            // Play retro arpeggio chime when bubble appears
-            playRetroChime();
+            // Start the CSS walk-in animation
+            setTimeout(() => {
+                if (widget) {
+                    widget.classList.add("arrived");
+                }
+            }, 100);
+
+            // Wait for CSS transition (1.5s) to complete
+            setTimeout(() => {
+                if (companionSprite) {
+                    companionSprite.classList.remove("walking"); // Stand still
+                    
+                    // Character takes a sip of water right after arriving
+                    setTimeout(() => {
+                        companionSprite.classList.add("drinking");
+                        // Stop drinking after 1.5 second (returns to holding glass)
+                        setTimeout(() => {
+                            companionSprite.classList.remove("drinking");
+                        }, 1500);
+                    }, 300);
+                }
+                if (speechBubble) speechBubble.classList.add("show");
+                if (actionsContainer) actionsContainer.classList.add("show");
+                
+                // Play retro arpeggio chime when bubble appears
+                playRetroChime();
+            }, 1600);
         });
     }
     
     // Wire up buttons to main IPC commands
+    let isClosing = false;
+    
     drankBtn.addEventListener("click", () => {
-        if (window.api && window.api.widgetDrank) {
-            window.api.widgetDrank();
+        if (isClosing) return;
+        isClosing = true;
+        
+        playBloopSound();
+        spawnParticles();
+        
+        const companionSprite = document.getElementById("companion-sprite");
+        if (companionSprite) {
+            companionSprite.classList.add("drinking");
         }
+        
+        setTimeout(() => {
+            if (window.api && window.api.widgetDrank) {
+                window.api.widgetDrank();
+            }
+        }, 1200);
     });
     
     snoozeBtn.addEventListener("click", () => {
-        if (window.api && window.api.widgetSnooze) {
-            window.api.widgetSnooze();
-        }
+        if (isClosing) return;
+        isClosing = true;
+        
+        playYawnSound();
+        
+        setTimeout(() => {
+            if (window.api && window.api.widgetSnooze) {
+                window.api.widgetSnooze();
+            }
+        }, 600);
     });
     
     // Pre-activate AudioContext on early clicks

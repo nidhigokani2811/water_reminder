@@ -74,6 +74,6 @@ To make AquaBuddy start automatically when your Mac boots and restart itself if 
 - **Left-Click**: Toggles the main AquaBuddy Dashboard.
 - **Right-Click**: Opens a quick context menu:
   - **Open Dashboard**: Opens the dashboard settings.
-  - **Log Glass (250ml)**: Quick-add water log directly from the bar.
+  - **Log Glass**: Quick-add water log directly from the bar (amount customizable via settings).
   - **Pause/Resume Timer**: Pause/resume current session (displays active remaining minutes, e.g. *Pause Timer (12:35)*).
   - **Quit**: Safely exits the application and unloads the startup plist daemon.

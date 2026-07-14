@@ -210,6 +210,11 @@
                         </div>
 
                         <div class="form-group">
+                            <label for="companion-name">Companion Name:</label>
+                            <input type="text" id="companion-name" class="form-input" placeholder="e.g. AquaBuddy, Pip, Droplet">
+                        </div>
+
+                        <div class="form-group">
                             <label for="interval-input">Reminder Interval (minutes):</label>
                             <div class="input-with-unit">
                                 <input type="number" id="interval-input" min="1" max="180" value="20" class="form-input">
@@ -221,6 +226,14 @@
                             <label for="goal-input">Daily Hydration Goal (ml):</label>
                             <div class="input-with-unit">
                                 <input type="number" id="goal-input" min="500" max="6000" step="100" value="2000" class="form-input">
+                                <span class="unit">ml</span>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="glass-size-input">Glass Size (ml):</label>
+                            <div class="input-with-unit">
+                                <input type="number" id="glass-size-input" min="50" max="1000" step="50" value="250" class="form-input">
                                 <span class="unit">ml</span>
                             </div>
                         </div>
