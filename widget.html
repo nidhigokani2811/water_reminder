@@ -110,6 +110,48 @@
                 opacity: 0;
             }
         }
+
+        .retro-speech-bubble {
+            max-width: 280px !important;
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 6px !important;
+            padding: 10px 14px !important;
+        }
+
+        .widget-companion-header {
+            font-family: var(--font-pixel);
+            font-size: 1.15rem;
+            color: #2563eb;
+            font-weight: bold;
+            text-transform: uppercase;
+            border-bottom: 1px dashed rgba(0, 0, 0, 0.15);
+            padding-bottom: 4px;
+            margin-bottom: 2px;
+            letter-spacing: 0.5px;
+            text-align: center;
+        }
+
+        .widget-stats-footer {
+            font-family: var(--font-pixel);
+            font-size: 0.95rem;
+            color: #555555;
+            border-top: 1px dashed rgba(0, 0, 0, 0.15);
+            padding-top: 4px;
+            margin-top: 2px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .retro-actions {
+            display: flex !important;
+            justify-content: center !important;
+            align-items: center !important;
+            width: 100% !important;
+            gap: 12px !important;
+            margin-top: 12px !important;
+        }
     </style>
 </head>
 <body>
@@ -117,7 +159,9 @@
     <div id="retro-widget" class="retro-widget">
         <!-- Speech Bubble -->
         <div class="retro-speech-bubble">
+            <div class="widget-companion-header" id="widget-companion-header">AQUABUDDY</div>
             <div class="retro-speech-text" id="widget-message">TIME TO DRINK WATER TO KEEP YOUR SKIN GLOWING!</div>
+            <div class="widget-stats-footer" id="widget-stats-footer"></div>
         </div>
         
         <!-- Companion Sprite and Base -->

@@ -270,11 +270,12 @@ function createWidgetWindow() {
     }
 
     const { width, height } = screen.getPrimaryDisplay().workArea;
-    const widgetWidth = 344; // Extended to touch the right edge for smooth CSS sliding
-    const widgetHeight = 600;
+    const widgetWidth = 380; // Extended to prevent horizontal clipping
+    const widgetHeight = 420; // Extended to prevent vertical clipping of quotes/buttons
     
     const targetX = width - widgetWidth;
     const y = height - widgetHeight - 24;
+
 
     widgetWindow = new BrowserWindow({
         width: widgetWidth,
