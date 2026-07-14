@@ -174,7 +174,10 @@ document.addEventListener("DOMContentLoaded", () => {
             const currentHour = new Date().getHours();
             const timeGreeting = currentHour < 12 ? "Good morning!" : currentHour >= 18 ? "Good evening!" : "Hello!";
             
-            if (state.yesterdayIntake && state.yesterdayIntake > 0) {
+            // 30% chance to show yesterday comparison if available
+            const showComparison = state.yesterdayIntake && state.yesterdayIntake > 0 && Math.random() < 0.3;
+            
+            if (showComparison) {
                 if (state.currentIntake < state.yesterdayIntake) {
                     message = `${compName} says: ${timeGreeting} Yesterday you drank ${state.yesterdayIntake}ml. You are at ${state.currentIntake}ml today. Keep pushing to beat your score! 🚀`;
                 } else {

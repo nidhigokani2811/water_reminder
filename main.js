@@ -271,7 +271,7 @@ function createWidgetWindow() {
 
     const { width, height } = screen.getPrimaryDisplay().workArea;
     const widgetWidth = 344; // Extended to touch the right edge for smooth CSS sliding
-    const widgetHeight = 350;
+    const widgetHeight = 600;
     
     const targetX = width - widgetWidth;
     const y = height - widgetHeight - 24;
@@ -486,40 +486,53 @@ ipcMain.on('widget-snooze', () => {
 });
 
 // App Lifecycle
-app.whenReady().then(() => {
-    loadState();
-    createTray();
-    
-    // Check if launched as hidden (system startup)
-    const isHidden = process.argv.includes('--hidden');
-    if (!isHidden) {
-        createDashboardWindow();
-    }
-    
-    if (state.timerRunning) {
-        startTimer();
-    } else {
-        if (state.secondsRemaining === undefined || state.secondsRemaining <= 0) {
-            state.secondsRemaining = state.intervalMinutes * 60;
+const gotTheLock = app.requestSingleInstanceLock();
+
+if (!gotTheLock) {
+    app.quit();
+} else {
+    app.on('second-instance', (event, commandLine, workingDirectory) => {
+        if (dashboardWindow) {
+            dashboardWindow.show();
+            dashboardWindow.focus();
         }
-        updateTrayMenu();
-    }
-});
+    });
 
-app.on('activate', () => {
-    if (dashboardWindow) {
-        dashboardWindow.show();
-    } else {
-        createDashboardWindow();
-    }
-});
+    app.whenReady().then(() => {
+        loadState();
+        createTray();
+        
+        // Check if launched as hidden (system startup)
+        const isHidden = process.argv.includes('--hidden');
+        if (!isHidden) {
+            createDashboardWindow();
+        }
+        
+        if (state.timerRunning) {
+            startTimer();
+        } else {
+            if (state.secondsRemaining === undefined || state.secondsRemaining <= 0) {
+                state.secondsRemaining = state.intervalMinutes * 60;
+            }
+            updateTrayMenu();
+        }
+    });
 
-app.on('before-quit', () => {
-    app.isQuitting = true;
-});
+    app.on('activate', () => {
+        if (dashboardWindow) {
+            dashboardWindow.show();
+        } else {
+            createDashboardWindow();
+        }
+    });
 
-app.on('window-all-closed', () => {
-    if (process.platform !== 'darwin') {
-        app.quit();
-    }
-});
+    app.on('before-quit', () => {
+        app.isQuitting = true;
+    });
+
+    app.on('window-all-closed', () => {
+        if (process.platform !== 'darwin') {
+            app.quit();
+        }
+    });
+}
